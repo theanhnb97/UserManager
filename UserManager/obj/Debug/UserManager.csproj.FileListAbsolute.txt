@@ -1,0 +1,10 @@
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\bin\Debug\UserManager.exe.config
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\bin\Debug\UserManager.exe
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\bin\Debug\UserManager.pdb
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.csprojResolveAssemblyReference.cache
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.Properties.Resources.resources
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.csproj.GenerateResource.Cache
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.exe
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.pdb
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\bin\Debug\Bunifu_UI_v1.52.dll
+E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.ProcessBar.resources
