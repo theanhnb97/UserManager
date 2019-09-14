@@ -1,136 +1,112 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Management;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.Devices;
 
 namespace UserManager
 {
     public partial class ProcessBar : Form
     {
+        private bool _changedSize;
+        private bool _colorStatus; // while
+        private PerformanceCounter _cpuCounter;
+        private bool _hideStatus;
+        private Point _lastLocation;
+        private Point _lastLocationPin;
+        private int _maxRam;
+
+
+        // design system
+        private bool _mouseDown;
+        private bool _pin;
+        private PerformanceCounter _ramCounter;
+
         public ProcessBar()
         {
             InitializeComponent();
-            InitialiseCPUCounter();
-            InitializeRAMCounter();
+            InitCpuCounter();
+            InitRamCounter();
         }
-        private PerformanceCounter cpuCounter;
-        private PerformanceCounter ramCounter;
-        int maxRam;
+
         private void Form2_Load(object sender, EventArgs e)
         {
             RamMax();
             BackColor = Color.DarkCyan;
             TransparencyKey = Color.Blue;
-            this.TopMost = true;
+            TopMost = true;
             TransparentForm();
-            this.StartPosition = FormStartPosition.Manual;
-            foreach (var scrn in Screen.AllScreens)
+            StartPosition = FormStartPosition.Manual;
+            foreach (var screen in Screen.AllScreens)
             {
-                if (scrn.Bounds.Contains(this.Location))
-                {
-                    this.Location = new Point(scrn.Bounds.Right - this.Width, scrn.Bounds.Top + scrn.WorkingArea.Height / 2);
-                    this.TopMost = true;
-                    return;
-                }
+                if (!screen.Bounds.Contains(Location)) continue;
+                Location = new Point(screen.Bounds.Right - Width, screen.Bounds.Top + screen.WorkingArea.Height / 2);
+                TopMost = true;
+                return;
             }
             GetInfo();
         }
-        void TransparentForm()
+
+        private void TransparentForm()
         {
-            float fontSize = 12;
+            const float fontSize = 12;
             lblCPU.Font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
             lblRam.Font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
             lblCPU.ForeColor = Color.White;
             lblRam.ForeColor = Color.White;
         }
+
         private void GetInfo()
         {
-            int cpu = Convert.ToInt32(cpuCounter.NextValue());
-            int ram = Convert.ToInt32(ramCounter.NextValue());
-            int ramused = maxRam - ram;
-            int ramPercent = (int)((ramused * 1.0 / maxRam) * 100);
-            lblCPU.Text = "CPU: " + cpu + "%";
-            lblRam.Text = "RAM: " + ramused + " MB (" + ramPercent + "%) ";
-            pcbCPU.Value = (int)cpu;
+            var cpu = Convert.ToInt32(_cpuCounter.NextValue());
+            var ram = Convert.ToInt32(_ramCounter.NextValue());
+            var ramUsed = _maxRam - ram;
+            var ramPercent = (int) (ramUsed * 1.0 / _maxRam * 100);
+            lblCPU.Text = $@"CPU: {cpu}%";
+            lblRam.Text = $@"RAM: {ramUsed} MB ({ramPercent}%) ";
+            pcbCPU.Value = cpu;
             pcbRAM.Value = ramPercent;
             if (cpu > 90)
-            {
                 pcbCPU.ProgressColor = Color.Red;
-            }
+            else if (cpu > 70)
+                pcbCPU.ProgressColor = Color.OrangeRed;
             else
-            {
-                if (cpu > 70) pcbCPU.ProgressColor = Color.OrangeRed;
-                else
-                {
-                    if (cpu > 40) pcbCPU.ProgressColor = Color.Salmon;
-                    else
-                        pcbCPU.ProgressColor = Color.Lime;
-                }
-            }
-            if (ramPercent > 80)
-            {
-                pcbRAM.ProgressColor = Color.Red;
-            }
-            else
-            {
-                if (ramPercent > 60) pcbRAM.ProgressColor = Color.OrangeRed;
-                else
-                {
-                    pcbRAM.ProgressColor = Color.Lime;
-                }
-            }
+                pcbCPU.ProgressColor = cpu > 40 ? Color.Salmon : Color.Lime;
 
+            if (ramPercent > 80)
+                pcbRAM.ProgressColor = Color.Red;
+            else
+                pcbRAM.ProgressColor = ramPercent > 60 ? Color.OrangeRed : Color.Lime;
         }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
             GetInfo();
-
         }
-        private void InitialiseCPUCounter()
+
+        private void InitCpuCounter()
         {
-            cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total", true);
+            _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total", true);
         }
-        private void InitializeRAMCounter()
+
+        private void InitRamCounter()
         {
-            ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
+            _ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
         }
 
-        void RamMax()
+        private void RamMax()
         {
-            ulong Ram = GetTotalMemoryInBytes();
-            Ram /= 1024;
-            Ram /= 1024;
-            maxRam = (int)Ram;
+            var ram = GetTotalMemoryInBytes();
+            ram /= 1024;
+            ram /= 1024;
+            _maxRam = (int) ram;
         }
 
-        static ulong GetTotalMemoryInBytes()
+        private static ulong GetTotalMemoryInBytes()
         {
-            return new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory;
+            return new ComputerInfo().TotalPhysicalMemory;
         }
 
-
-
-
-
-
-
-        // design system
-        private bool mouseDown;
-        private Point lastLocation;
-        bool Pin = false;
-        private Point lastLocationPin;
-        bool changedSize = false;
-        bool hideStatus = false;
-        bool colorStatus = false; // while
         private void btnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -139,24 +115,22 @@ namespace UserManager
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-            mouseDown = true;
-            lastLocation = e.Location;
+            _mouseDown = true;
+            _lastLocation = e.Location;
         }
 
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (mouseDown)
-            {
-                this.Location = new Point(
-                    (this.Location.X - lastLocation.X) + e.X, (this.Location.Y - lastLocation.Y) + e.Y);
-                this.TopMost = true;
-                this.Update();
-            }
+            if (!_mouseDown) return;
+            Location = new Point(
+                Location.X - _lastLocation.X + e.X, Location.Y - _lastLocation.Y + e.Y);
+            TopMost = true;
+            Update();
         }
 
         private void Form1_MouseUp(object sender, MouseEventArgs e)
         {
-            mouseDown = false;
+            _mouseDown = false;
         }
 
         private void btnPin_Click(object sender, EventArgs e)
@@ -166,59 +140,57 @@ namespace UserManager
 
 
         // change display size
-        void ChangeDisplaySize()
+        private void ChangeDisplaySize()
         {
-            if (!changedSize)
+            if (!_changedSize)
             {
-                changedSize = true;
-                this.Size = new Size(200 * 2, 140 / 2);
+                _changedSize = true;
+                Size = new Size(200 * 2, 140 / 2);
                 lblRam.Location = new Point(pcbCPU.Location.X + pcbCPU.Width + 20, lblCPU.Location.Y);
                 pcbRAM.Location = new Point(pcbCPU.Location.X + pcbCPU.Width + 20, pcbCPU.Location.Y);
             }
             else
             {
-                changedSize = false;
-                this.Size = new Size(200, 140);
+                _changedSize = false;
+                Size = new Size(200, 140);
                 lblRam.Location = new Point(pcbCPU.Location.X, pcbCPU.Location.Y + pcbCPU.Height + 15);
                 pcbRAM.Location = new Point(lblRam.Location.X, lblRam.Location.Y + pcbCPU.Height + 10);
             }
 
 
-            if (!Pin)
+            if (!_pin)
             {
-                lastLocationPin = this.Location;
-                foreach (var scrn in Screen.AllScreens)
+                _lastLocationPin = Location;
+                foreach (var screen in Screen.AllScreens)
                 {
-                    if (scrn.Bounds.Contains(this.Location))
-                    {
-                        this.Location = new Point(scrn.Bounds.Right - this.Width - this.Width / 2, scrn.Bounds.Top);
-                        this.TopMost = true;
-                        Pin = true;
-                        return;
-                    }
+                    if (!screen.Bounds.Contains(Location)) continue;
+                    Location = new Point(screen.Bounds.Right - Width - Width / 2, screen.Bounds.Top);
+                    TopMost = true;
+                    _pin = true;
+                    return;
                 }
             }
             else
             {
-                this.Location = lastLocationPin;
-                this.TopMost = true;
-                Pin = false;
+                Location = _lastLocationPin;
+                TopMost = true;
+                _pin = false;
             }
         }
 
-        void HideParent()
+        private void HideParent()
         {
-            if (!hideStatus)
+            if (!_hideStatus)
             {
                 BackColor = Color.DarkCyan;
                 TransparencyKey = Color.DarkCyan;
-                hideStatus = true;
+                _hideStatus = true;
             }
             else
             {
                 BackColor = Color.DarkCyan;
                 TransparencyKey = Color.Blue;
-                hideStatus = false;
+                _hideStatus = false;
             }
         }
 
@@ -229,19 +201,19 @@ namespace UserManager
 
         private void btnColor_Click(object sender, EventArgs e)
         {
-            if (!colorStatus)
+            if (!_colorStatus)
             {
                 lblCPU.ForeColor = Color.Teal;
                 lblRam.ForeColor = Color.Teal;
-                if (!hideStatus) this.BackColor = Color.LightCoral;
-                colorStatus = true;
+                if (!_hideStatus) BackColor = Color.LightCoral;
+                _colorStatus = true;
             }
             else
             {
                 lblCPU.ForeColor = Color.White;
                 lblRam.ForeColor = Color.White;
-                if (!hideStatus) this.BackColor = Color.Teal;
-                colorStatus = false;
+                if (!_hideStatus) BackColor = Color.Teal;
+                _colorStatus = false;
             }
         }
     }

@@ -8,3 +8,6 @@ E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\U
 E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.pdb
 E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\bin\Debug\Bunifu_UI_v1.52.dll
 E:\OneDrive\Workspace\1---- Source Code\Code\UserManager\UserManager\obj\Debug\UserManager.ProcessBar.resources
+C:\Users\gamo0\OneDrive\Workspace\Git\2-Source\sourcecodeblabla\UserManager\UserManager\obj\Debug\UserManager.csprojAssemblyReference.cache
+C:\Users\gamo0\OneDrive\Workspace\Git\2-Source\sourcecodeblabla\UserManager\UserManager\obj\Debug\UserManager.exe
+C:\Users\gamo0\OneDrive\Workspace\Git\2-Source\sourcecodeblabla\UserManager\UserManager\obj\Debug\UserManager.pdb
